@@ -205,9 +205,9 @@ const Storage = {
   },
   getProfile() {
     return this.get("learnerProfile") || {
-      name: "Alex Johnson",
-      email: "alex.johnson@example.com",
-      joined: "January 2025",
+      name: "Aishwarya Shivareddi",
+      email: "aishwaryashivareddi@gmail.com",
+      joined: "Feb 2026",
       role: "Learner"
     };
   }
