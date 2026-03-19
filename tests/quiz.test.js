@@ -1,6 +1,6 @@
 const { calculatePercentage, getGrade, isPass, getFeedback } = require("../js/data");
 
-// Test 1: Grade calculation logic
+
 describe("getGrade", () => {
   test("returns A+ for 90% and above", () => {
     expect(getGrade(90)).toBe("A+");
@@ -25,7 +25,7 @@ describe("getGrade", () => {
   });
 });
 
-// Test 2: Score percentage calculation
+
 describe("calculatePercentage", () => {
   test("calculates correct percentage", () => {
     expect(calculatePercentage(7, 10)).toBe(70);
@@ -41,7 +41,7 @@ describe("calculatePercentage", () => {
   });
 });
 
-// Test 3: Pass/Fail determination logic
+
 describe("isPass", () => {
   test("returns true for 50% and above", () => {
     expect(isPass(50)).toBe(true);
@@ -54,7 +54,7 @@ describe("isPass", () => {
   });
 });
 
-// Bonus: Feedback via switch statement
+
 describe("getFeedback", () => {
   test("returns appropriate feedback for each grade", () => {
     expect(getFeedback("A+")).toContain("Outstanding");
