@@ -1,4 +1,4 @@
-/* ===== CSS Variables ===== */
+
 :root {
   --primary: #4361ee;
   --primary-dark: #3a56d4;
@@ -14,13 +14,12 @@
   --shadow: 0 2px 12px rgba(0,0,0,0.08);
 }
 
-/* ===== Reset & Base ===== */
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: var(--dark); line-height: 1.6; }
 a { text-decoration: none; color: inherit; }
 img { max-width: 100%; }
 
-/* ===== Header & Nav ===== */
 header.site-header {
   background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: #fff;
@@ -34,7 +33,6 @@ header .header-inner { display: flex; align-items: center; justify-content: spac
 header .brand { font-size: 1.4rem; font-weight: 700; letter-spacing: 0.5px; }
 header .brand i { margin-right: 0.4rem; }
 
-/* Nav links */
 nav.main-nav ul { list-style: none; display: flex; gap: 0.3rem; }
 nav.main-nav a {
   padding: 0.5rem 1rem;
@@ -46,10 +44,10 @@ nav.main-nav a {
 nav.main-nav a:hover,
 nav.main-nav a[data-active="true"] { background: rgba(255,255,255,0.2); }
 
-/* Hamburger */
+
 .hamburger { display: none; background: none; border: none; color: #fff; font-size: 1.5rem; cursor: pointer; }
 
-/* ===== Breadcrumb ===== */
+
 .breadcrumb-bar {
   background: #fff;
   padding: 0.6rem 2rem;
@@ -61,10 +59,10 @@ nav.main-nav a[data-active="true"] { background: rgba(255,255,255,0.2); }
 .breadcrumb-bar a { color: var(--primary); }
 .breadcrumb-bar li:last-child { color: var(--gray); }
 
-/* ===== Main Content ===== */
+
 main.content { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem; }
 
-/* ===== Dashboard Grid (CSS Grid) ===== */
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -90,7 +88,7 @@ main.content { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem; }
 .stat-card[data-color="orange"] .stat-icon { color: var(--warning); }
 .stat-card[data-color="red"] .stat-icon { color: var(--danger); }
 
-/* ===== Course Cards (Flexbox) ===== */
+
 .course-cards {
   display: flex;
   flex-wrap: wrap;
@@ -128,7 +126,7 @@ progress::-moz-progress-bar { background: var(--success); border-radius: 4px; }
 
 .card-actions { display: flex; gap: 0.5rem; }
 
-/* ===== Buttons ===== */
+
 .btn {
   display: inline-block;
   padding: 0.5rem 1.2rem;
@@ -148,7 +146,7 @@ progress::-moz-progress-bar { background: var(--success); border-radius: 4px; }
 .btn-sm { padding: 0.35rem 0.8rem; font-size: 0.82rem; }
 .btn-danger { background: var(--danger); color: #fff; }
 
-/* ===== Section Titles ===== */
+
 .section-title {
   font-size: 1.3rem;
   font-weight: 700;
@@ -158,7 +156,7 @@ progress::-moz-progress-bar { background: var(--success); border-radius: 4px; }
   display: inline-block;
 }
 
-/* ===== Tables ===== */
+
 .table-wrap { overflow-x: auto; margin-bottom: 2rem; }
 table.data-table {
   width: 100%;
@@ -174,7 +172,7 @@ table.data-table th { background: var(--primary); color: #fff; font-weight: 600;
 table.data-table tbody tr:nth-child(even) { background: #f8f9fc; }
 table.data-table tbody tr:hover { background: #eef1ff; }
 
-/* ===== Quiz Page ===== */
+
 .quiz-container {
   background: #fff;
   border-radius: var(--radius);
@@ -213,7 +211,7 @@ table.data-table tbody tr:hover { background: #eef1ff; }
 /* Combinator: selected option */
 .options-list input[type="radio"]:checked + span { font-weight: 600; color: var(--primary); }
 
-/* Results */
+
 .quiz-result {
   background: #fff;
   border-radius: var(--radius);
@@ -228,7 +226,7 @@ table.data-table tbody tr:hover { background: #eef1ff; }
 .quiz-result.pass { border-left: 5px solid var(--success); }
 .quiz-result.fail { border-left: 5px solid var(--danger); }
 
-/* ===== Profile Page ===== */
+
 .profile-card {
   background: #fff;
   border-radius: var(--radius);
@@ -276,7 +274,7 @@ table.data-table tbody tr:hover { background: #eef1ff; }
 }
 .completed-list li .check { color: var(--success); font-weight: 700; }
 
-/* ===== Lesson list ===== */
+
 .lesson-panel {
   background: #fff;
   border-radius: var(--radius);
@@ -288,7 +286,7 @@ table.data-table tbody tr:hover { background: #eef1ff; }
 .lesson-panel ol { padding-left: 1.2rem; }
 .lesson-panel ol li { padding: 0.3rem 0; }
 
-/* ===== Footer ===== */
+
 footer.site-footer {
   background: var(--dark);
   color: #adb5bd;
@@ -298,7 +296,7 @@ footer.site-footer {
   font-size: 0.85rem;
 }
 
-/* ===== Responsive (Media Queries) ===== */
+
 @media (max-width: 992px) {
   .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
 }
