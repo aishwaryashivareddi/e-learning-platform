@@ -1,4 +1,3 @@
-// ===== Course Data (Array of Objects) =====
 const courses = [
   {
     id: 1,
@@ -66,7 +65,6 @@ const courses = [
   }
 ];
 
-// ===== Quiz Questions (Array of Objects) =====
 const quizQuestions = [
   {
     id: 1,
@@ -140,7 +138,6 @@ const quizQuestions = [
   }
 ];
 
-// ===== Grade Calculation Logic =====
 function calculatePercentage(score, total) {
   if (total <= 0) return 0;
   return Math.round((score / total) * 100);
@@ -159,7 +156,6 @@ function isPass(percentage) {
   return percentage >= 50;
 }
 
-// Switch statement for performance feedback
 function getFeedback(grade) {
   switch (grade) {
     case "A+": return "Outstanding! You have mastered this topic!";
@@ -172,7 +168,6 @@ function getFeedback(grade) {
   }
 }
 
-// ===== Web Storage Helpers =====
 const Storage = {
   get(key) {
     try {
@@ -213,7 +208,6 @@ const Storage = {
   }
 };
 
-// ===== Async Quiz Loading (Promise + async/await + setTimeout) =====
 function loadQuizData() {
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -227,7 +221,7 @@ async function fetchQuiz() {
   return questions;
 }
 
-// ===== Nav Active State & Hamburger =====
+
 function initNav(activePage) {
   const links = document.querySelectorAll("nav.main-nav a");
   links.forEach(link => {
