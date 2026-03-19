@@ -10,7 +10,7 @@
 </head>
 <body>
 
-  <!-- Header & Nav -->
+  
   <header class="site-header">
     <div class="header-inner">
       <div class="brand"><i class="bi bi-mortarboard-fill"></i> LearnHub</div>
@@ -26,7 +26,7 @@
     </div>
   </header>
 
-  <!-- Breadcrumb -->
+  
   <div class="breadcrumb-bar">
     <ol>
       <li><a href="Dashboard.html">Home</a></li>
@@ -34,11 +34,11 @@
     </ol>
   </div>
 
-  <!-- Main Content -->
+  
   <main class="content">
     <h2 class="section-title">Dashboard Overview</h2>
 
-    <!-- Stats Grid (CSS Grid) -->
+   
     <section class="dashboard-grid" id="statsGrid">
       <div class="stat-card" data-color="blue">
         <div class="stat-icon"><i class="bi bi-book-half"></i></div>
@@ -62,7 +62,7 @@
       </div>
     </section>
 
-    <!-- Course Cards (Flexbox) -->
+    
     <h2 class="section-title">My Courses</h2>
     <section class="course-cards" id="courseCards"></section>
   </main>
@@ -76,7 +76,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       initNav("dashboard");
 
-      // Populate stats
+      
       const progress = Storage.getProgress();
       let completed = 0, inProg = 0;
       courses.forEach(c => {
@@ -89,7 +89,7 @@
       document.getElementById("inProgress").textContent = inProg;
       document.getElementById("quizzesTaken").textContent = Storage.getQuizResults().length;
 
-      // Render course cards
+      
       const container = document.getElementById("courseCards");
       courses.forEach(c => {
         const done = progress[c.id] || 0;
