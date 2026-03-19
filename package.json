@@ -1,0 +1,11 @@
+{
+  "name": "e-learning-platform",
+  "version": "1.0.0",
+  "description": "Multi-Page E-Learning Platform (Frontend)",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  }
+}

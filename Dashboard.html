@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard | E-Learning Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Header & Nav -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><i class="bi bi-mortarboard-fill"></i> LearnHub</div>
+      <button class="hamburger" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="Dashboard.html" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+          <li><a href="Courses.html" data-page="courses"><i class="bi bi-book"></i> Courses</a></li>
+          <li><a href="Quiz.html" data-page="quiz"><i class="bi bi-patch-question"></i> Quiz</a></li>
+          <li><a href="Profile.html" data-page="profile"><i class="bi bi-person"></i> Profile</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Breadcrumb -->
+  <div class="breadcrumb-bar">
+    <ol>
+      <li><a href="Dashboard.html">Home</a></li>
+      <li>Dashboard</li>
+    </ol>
+  </div>
+
+  <!-- Main Content -->
+  <main class="content">
+    <h2 class="section-title">Dashboard Overview</h2>
+
+    <!-- Stats Grid (CSS Grid) -->
+    <section class="dashboard-grid" id="statsGrid">
+      <div class="stat-card" data-color="blue">
+        <div class="stat-icon"><i class="bi bi-book-half"></i></div>
+        <h3>Total Courses</h3>
+        <div class="stat-value" id="totalCourses">0</div>
+      </div>
+      <div class="stat-card" data-color="green">
+        <div class="stat-icon"><i class="bi bi-check-circle"></i></div>
+        <h3>Completed</h3>
+        <div class="stat-value" id="completedCourses">0</div>
+      </div>
+      <div class="stat-card" data-color="orange">
+        <div class="stat-icon"><i class="bi bi-hourglass-split"></i></div>
+        <h3>In Progress</h3>
+        <div class="stat-value" id="inProgress">0</div>
+      </div>
+      <div class="stat-card" data-color="red">
+        <div class="stat-icon"><i class="bi bi-trophy"></i></div>
+        <h3>Quizzes Taken</h3>
+        <div class="stat-value" id="quizzesTaken">0</div>
+      </div>
+    </section>
+
+    <!-- Course Cards (Flexbox) -->
+    <h2 class="section-title">My Courses</h2>
+    <section class="course-cards" id="courseCards"></section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 LearnHub E-Learning Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initNav("dashboard");
+
+      // Populate stats
+      const progress = Storage.getProgress();
+      let completed = 0, inProg = 0;
+      courses.forEach(c => {
+        const done = progress[c.id] || 0;
+        if (done >= c.totalLessons) completed++;
+        else if (done > 0) inProg++;
+      });
+      document.getElementById("totalCourses").textContent = courses.length;
+      document.getElementById("completedCourses").textContent = completed;
+      document.getElementById("inProgress").textContent = inProg;
+      document.getElementById("quizzesTaken").textContent = Storage.getQuizResults().length;
+
+      // Render course cards
+      const container = document.getElementById("courseCards");
+      courses.forEach(c => {
+        const done = progress[c.id] || 0;
+        const pct = Math.round((done / c.totalLessons) * 100);
+        const card = document.createElement("div");
+        card.className = "course-card";
+        card.innerHTML = `
+          <div class="card-banner" style="background:${c.color}">
+            <i class="bi ${c.icon}"></i>
+          </div>
+          <div class="card-body">
+            <h3>${c.title}</h3>
+            <p>${c.description}</p>
+            <div class="progress-wrap">
+              <label>Progress: ${pct}%</label>
+              <progress value="${done}" max="${c.totalLessons}"></progress>
+            </div>
+            <div class="card-actions">
+              <a href="Courses.html?id=${c.id}" class="btn btn-primary btn-sm">View Course</a>
+              <a href="Quiz.html" class="btn btn-outline btn-sm">Take Quiz</a>
+            </div>
+          </div>`;
+        container.appendChild(card);
+      });
+    });
+  </script>
+</body>
+</html>

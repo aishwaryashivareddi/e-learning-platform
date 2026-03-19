@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz | E-Learning Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><i class="bi bi-mortarboard-fill"></i> LearnHub</div>
+      <button class="hamburger" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="Dashboard.html" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+          <li><a href="Courses.html" data-page="courses"><i class="bi bi-book"></i> Courses</a></li>
+          <li><a href="Quiz.html" data-page="quiz"><i class="bi bi-patch-question"></i> Quiz</a></li>
+          <li><a href="Profile.html" data-page="profile"><i class="bi bi-person"></i> Profile</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <ol>
+      <li><a href="Dashboard.html">Home</a></li>
+      <li>Quiz</li>
+    </ol>
+  </div>
+
+  <main class="content">
+    <h2 class="section-title">Knowledge Quiz</h2>
+
+    <!-- Loader (shown during async fetch) -->
+    <div class="quiz-container" id="quizLoader">
+      <div class="quiz-loader">
+        <div class="spinner"></div>
+        <p>Loading quiz questions...</p>
+      </div>
+    </div>
+
+    <!-- Quiz Form (hidden until loaded) -->
+    <form class="quiz-container" id="quizForm" style="display:none;">
+      <div id="questionsContainer"></div>
+      <button type="submit" class="btn btn-primary" id="submitQuizBtn">
+        <i class="bi bi-send"></i> Submit Quiz
+      </button>
+    </form>
+
+    <!-- Results (hidden until submitted) -->
+    <div id="quizResultSection" style="display:none;"></div>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 LearnHub E-Learning Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script>
+    let loadedQuestions = [];
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      initNav("quiz");
+
+      // Async loading with Promise + async/await + setTimeout
+      try {
+        loadedQuestions = await fetchQuiz();
+        document.getElementById("quizLoader").style.display = "none";
+        document.getElementById("quizForm").style.display = "block";
+        renderQuestions(loadedQuestions);
+      } catch (err) {
+        document.getElementById("quizLoader").innerHTML =
+          '<p style="color:var(--danger);text-align:center;">Failed to load quiz. Please refresh.</p>';
+      }
+    });
+
+    // DOM Manipulation: dynamically generate questions & options
+    function renderQuestions(questions) {
+      const container = document.getElementById("questionsContainer");
+      container.innerHTML = "";
+
+      questions.forEach((q, idx) => {
+        const block = document.createElement("div");
+        block.className = "question-block";
+        block.innerHTML = `<h4><span class="q-num">Q${idx + 1}.</span> ${q.question}</h4>`;
+
+        const ul = document.createElement("ul");
+        ul.className = "options-list";
+
+        q.options.forEach((opt, oi) => {
+          const li = document.createElement("li");
+          const inputId = `q${q.id}_o${oi}`;
+          li.innerHTML = `
+            <label for="${inputId}">
+              <input type="radio" name="q${q.id}" id="${inputId}" value="${oi}">
+              <span>${opt}</span>
+            </label>`;
+          ul.appendChild(li);
+
+          // onchange event for selecting answers
+          li.querySelector("input").addEventListener("change", () => {
+            ul.querySelectorAll("label").forEach(l => l.style.borderColor = "var(--border)");
+            li.querySelector("label").style.borderColor = "var(--primary)";
+          });
+        });
+
+        block.appendChild(ul);
+        container.appendChild(block);
+      });
+    }
+
+    // onclick event for quiz submission
+    document.getElementById("quizForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      let score = 0;
+      let unanswered = 0;
+
+      loadedQuestions.forEach(q => {
+        const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
+        if (!selected) {
+          unanswered++;
+        } else if (parseInt(selected.value) === q.correct) {
+          score++;
+        }
+      });
+
+      if (unanswered > 0) {
+        alert(`Please answer all questions. ${unanswered} question(s) unanswered.`);
+        return;
+      }
+
+      const total = loadedQuestions.length;
+      const percentage = calculatePercentage(score, total);
+      const grade = getGrade(percentage);
+      const passed = isPass(percentage);
+      const feedback = getFeedback(grade);
+
+      // Save to localStorage
+      Storage.saveQuizResult({
+        date: new Date().toISOString(),
+        score,
+        total,
+        percentage,
+        grade,
+        passed
+      });
+
+      // Hide form, show results
+      document.getElementById("quizForm").style.display = "none";
+      showResults(score, total, percentage, grade, passed, feedback);
+    });
+
+    function showResults(score, total, percentage, grade, passed, feedback) {
+      const section = document.getElementById("quizResultSection");
+      section.style.display = "block";
+      section.innerHTML = `
+        <div class="quiz-result ${passed ? 'pass' : 'fail'}">
+          <div class="score">${percentage}%</div>
+          <div class="grade">Grade: ${grade} — ${passed ? '✅ PASSED' : '❌ FAILED'}</div>
+          <p class="feedback">${feedback}</p>
+          <p style="margin-bottom:0.5rem;">You scored <strong>${score}</strong> out of <strong>${total}</strong></p>
+          <div class="progress-wrap" style="max-width:300px;margin:1rem auto;">
+            <progress value="${score}" max="${total}"></progress>
+          </div>
+          <button class="btn btn-primary" onclick="location.reload()"><i class="bi bi-arrow-clockwise"></i> Retake Quiz</button>
+          <a href="Profile.html" class="btn btn-outline" style="margin-left:0.5rem;">View Profile</a>
+        </div>`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses | E-Learning Platform</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="brand"><i class="bi bi-mortarboard-fill"></i> LearnHub</div>
+      <button class="hamburger" aria-label="Toggle menu"><i class="bi bi-list"></i></button>
+      <nav class="main-nav">
+        <ul>
+          <li><a href="Dashboard.html" data-page="dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+          <li><a href="Courses.html" data-page="courses"><i class="bi bi-book"></i> Courses</a></li>
+          <li><a href="Quiz.html" data-page="quiz"><i class="bi bi-patch-question"></i> Quiz</a></li>
+          <li><a href="Profile.html" data-page="profile"><i class="bi bi-person"></i> Profile</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <div class="breadcrumb-bar">
+    <ol>
+      <li><a href="Dashboard.html">Home</a></li>
+      <li><a href="Courses.html">Courses</a></li>
+      <li id="breadcrumbCurrent">All Courses</li>
+    </ol>
+  </div>
+
+  <main class="content">
+    <!-- Course Table -->
+    <section id="courseTableSection">
+      <h2 class="section-title">All Courses</h2>
+      <div class="table-wrap">
+        <table class="data-table" id="courseTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Course Title</th>
+              <th>Lessons</th>
+              <th>Progress</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Course Detail (shown when ?id= is present) -->
+    <section id="courseDetail" style="display:none;">
+      <h2 class="section-title" id="detailTitle"></h2>
+      <p id="detailDesc" style="color:#6c757d;margin-bottom:1.2rem;"></p>
+
+      <div class="progress-wrap" style="max-width:400px;margin-bottom:1.5rem;">
+        <label id="detailProgressLabel">Progress: 0%</label>
+        <progress id="detailProgress" value="0" max="1"></progress>
+      </div>
+
+      <!-- Ordered Lesson List -->
+      <div class="lesson-panel">
+        <h3><i class="bi bi-list-ol"></i> Lessons</h3>
+        <ol id="lessonList"></ol>
+      </div>
+
+      <button class="btn btn-success" id="completeLessonBtn">
+        <i class="bi bi-check-lg"></i> Mark Next Lesson Complete
+      </button>
+      <a href="Courses.html" class="btn btn-outline" style="margin-left:0.5rem;">Back to All Courses</a>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>&copy; 2025 LearnHub E-Learning Platform. All rights reserved.</p>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      initNav("courses");
+
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get("id");
+
+      if (courseId) {
+        showCourseDetail(parseInt(courseId));
+      } else {
+        showCourseTable();
+      }
+    });
+
+    function showCourseTable() {
+      const tbody = document.querySelector("#courseTable tbody");
+      const progress = Storage.getProgress();
+
+      courses.forEach((c, i) => {
+        const done = progress[c.id] || 0;
+        const pct = Math.round((done / c.totalLessons) * 100);
+        let status = "Not Started";
+        let badge = "bg-secondary";
+        if (done >= c.totalLessons) { status = "Completed"; badge = "bg-success"; }
+        else if (done > 0) { status = "In Progress"; badge = "bg-warning text-dark"; }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${i + 1}</td>
+          <td><strong>${c.title}</strong></td>
+          <td>${c.totalLessons}</td>
+          <td>
+            <progress value="${done}" max="${c.totalLessons}" style="width:80px;"></progress>
+            <span style="font-size:0.8rem;margin-left:0.3rem;">${pct}%</span>
+          </td>
+          <td><span class="badge ${badge}">${status}</span></td>
+          <td><a href="Courses.html?id=${c.id}" class="btn btn-primary btn-sm">View</a></td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showCourseDetail(id) {
+      const course = courses.find(c => c.id === id);
+      if (!course) return;
+
+      document.getElementById("courseTableSection").style.display = "none";
+      document.getElementById("courseDetail").style.display = "block";
+      document.getElementById("breadcrumbCurrent").textContent = course.title;
+      document.getElementById("detailTitle").textContent = course.title;
+      document.getElementById("detailDesc").textContent = course.description;
+
+      const done = Storage.getCompletedLessons(course.id);
+      updateDetailProgress(course, done);
+      renderLessons(course, done);
+
+      document.getElementById("completeLessonBtn").onclick = () => {
+        const current = Storage.getCompletedLessons(course.id);
+        if (current < course.totalLessons) {
+          Storage.setProgress(course.id, current + 1);
+          updateDetailProgress(course, current + 1);
+          renderLessons(course, current + 1);
+        }
+      };
+    }
+
+    function updateDetailProgress(course, done) {
+      const pct = Math.round((done / course.totalLessons) * 100);
+      document.getElementById("detailProgress").value = done;
+      document.getElementById("detailProgress").max = course.totalLessons;
+      document.getElementById("detailProgressLabel").textContent = `Progress: ${pct}%`;
+
+      const btn = document.getElementById("completeLessonBtn");
+      if (done >= course.totalLessons) {
+        btn.textContent = "✅ Course Completed!";
+        btn.disabled = true;
+      }
+    }
+
+    function renderLessons(course, done) {
+      const ol = document.getElementById("lessonList");
+      ol.innerHTML = "";
+      course.lessons.forEach((lesson, i) => {
+        const li = document.createElement("li");
+        li.style.padding = "0.4rem 0";
+        if (i < done) {
+          li.innerHTML = `<span style="color:var(--success);"><i class="bi bi-check-circle-fill"></i></span> <s>${lesson}</s>`;
+        } else if (i === done) {
+          li.innerHTML = `<strong style="color:var(--primary);"><i class="bi bi-arrow-right-circle"></i> ${lesson}</strong> <span class="badge bg-primary">Current</span>`;
+        } else {
+          li.innerHTML = `<span style="color:var(--gray);"><i class="bi bi-circle"></i> ${lesson}</span>`;
+        }
+        ol.appendChild(li);
+      });
+    }
+  </script>
+</body>
+</html>
