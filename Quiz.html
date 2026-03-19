@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <!-- Quiz Form (hidden until loaded) -->
+    
     <form class="quiz-container" id="quizForm" style="display:none;">
       <div id="questionsContainer"></div>
       <button type="submit" class="btn btn-primary" id="submitQuizBtn">
@@ -51,7 +51,7 @@
       </button>
     </form>
 
-    <!-- Results (hidden until submitted) -->
+   
     <div id="quizResultSection" style="display:none;"></div>
   </main>
 
@@ -66,7 +66,7 @@
     document.addEventListener("DOMContentLoaded", async () => {
       initNav("quiz");
 
-      // Async loading with Promise + async/await + setTimeout
+      
       try {
         loadedQuestions = await fetchQuiz();
         document.getElementById("quizLoader").style.display = "none";
@@ -78,7 +78,7 @@
       }
     });
 
-    // DOM Manipulation: dynamically generate questions & options
+    
     function renderQuestions(questions) {
       const container = document.getElementById("questionsContainer");
       container.innerHTML = "";
@@ -101,7 +101,7 @@
             </label>`;
           ul.appendChild(li);
 
-          // onchange event for selecting answers
+          
           li.querySelector("input").addEventListener("change", () => {
             ul.querySelectorAll("label").forEach(l => l.style.borderColor = "var(--border)");
             li.querySelector("label").style.borderColor = "var(--primary)";
@@ -113,7 +113,7 @@
       });
     }
 
-    // onclick event for quiz submission
+   
     document.getElementById("quizForm").addEventListener("submit", (e) => {
       e.preventDefault();
 
@@ -140,7 +140,7 @@
       const passed = isPass(percentage);
       const feedback = getFeedback(grade);
 
-      // Save to localStorage
+      
       Storage.saveQuizResult({
         date: new Date().toISOString(),
         score,
@@ -150,7 +150,7 @@
         passed
       });
 
-      // Hide form, show results
+      
       document.getElementById("quizForm").style.display = "none";
       showResults(score, total, percentage, grade, passed, feedback);
     });
@@ -161,7 +161,7 @@
       section.innerHTML = `
         <div class="quiz-result ${passed ? 'pass' : 'fail'}">
           <div class="score">${percentage}%</div>
-          <div class="grade">Grade: ${grade} — ${passed ? '✅ PASSED' : '❌ FAILED'}</div>
+          <div class="grade">Grade: ${grade} — ${passed ? 'PASSED' : 'FAILED'}</div>
           <p class="feedback">${feedback}</p>
           <p style="margin-bottom:0.5rem;">You scored <strong>${score}</strong> out of <strong>${total}</strong></p>
           <div class="progress-wrap" style="max-width:300px;margin:1rem auto;">
