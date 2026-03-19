@@ -35,14 +35,14 @@
   <main class="content">
     <h2 class="section-title">Learner Profile</h2>
 
-    <!-- Profile Card -->
+    
     <div class="profile-card" id="profileCard"></div>
 
-    <!-- Completed Courses -->
+   
     <h2 class="section-title">Course Progress</h2>
     <ul class="completed-list" id="completedList"></ul>
 
-    <!-- Quiz History Table -->
+  
     <h2 class="section-title" style="margin-top:2rem;">Quiz History</h2>
     <div class="table-wrap">
       <table class="data-table" id="quizHistoryTable">
@@ -74,7 +74,7 @@
     document.addEventListener("DOMContentLoaded", () => {
       initNav("profile");
 
-      // Render profile card
+      
       const profile = Storage.getProfile();
       document.getElementById("profileCard").innerHTML = `
         <div class="profile-avatar">${profile.name.charAt(0)}</div>
@@ -85,7 +85,7 @@
           <span class="badge badge-learner">${profile.role}</span>
         </div>`;
 
-      // Render course progress
+      
       const list = document.getElementById("completedList");
       const progress = Storage.getProgress();
       courses.forEach(c => {
@@ -103,7 +103,7 @@
         list.appendChild(li);
       });
 
-      // Render quiz history
+      
       const results = Storage.getQuizResults();
       const tbody = document.querySelector("#quizHistoryTable tbody");
       if (results.length === 0) {
@@ -122,7 +122,7 @@
         });
       }
 
-      // Clear data
+      
       document.getElementById("clearDataBtn").addEventListener("click", () => {
         if (confirm("Clear all progress and quiz data?")) {
           localStorage.clear();
