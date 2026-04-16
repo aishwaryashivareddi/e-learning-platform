@@ -205,6 +205,12 @@ const Storage = {
       joined: "Feb 2026",
       role: "Learner"
     };
+  },
+  getUserId() {
+    return this.get("userId") || 2;
+  },
+  setUserId(id) {
+    this.set("userId", id);
   }
 };
 
@@ -219,6 +225,45 @@ function loadQuizData() {
 async function fetchQuiz() {
   const questions = await loadQuizData();
   return questions;
+}
+
+// Fetch courses from backend API, fallback to local data
+async function fetchCoursesFromApi() {
+  try {
+    if (typeof Api === 'undefined') return null;
+    const apiCourses = await Api.getCourses();
+    if (!apiCourses || !apiCourses.length) return null;
+    // Enrich with lessons from API
+    const enriched = [];
+    for (const c of apiCourses) {
+      const lessons = await Api.getLessons(c.courseId) || [];
+      const icons = ['bi-filetype-html','bi-filetype-js','bi-filetype-jsx','bi-hdd-network'];
+      const colors = ['#e44d26','#f7df1e','#61dafb','#68a063'];
+      const idx = enriched.length;
+      enriched.push({
+        id: c.courseId,
+        title: c.title,
+        description: c.description,
+        icon: icons[idx % icons.length],
+        color: colors[idx % colors.length],
+        lessons: lessons.map(l => l.title),
+        totalLessons: lessons.length
+      });
+    }
+    return enriched;
+  } catch { return null; }
+}
+
+// Fetch quiz questions from backend API, fallback to local data
+async function fetchQuizFromApi(courseId) {
+  try {
+    if (typeof Api === 'undefined') return null;
+    const quizzes = await Api.getQuizzes(courseId);
+    if (!quizzes || !quizzes.length) return null;
+    const quiz = await Api.getQuizQuestions(quizzes[0].quizId);
+    if (!quiz || !quiz.questions || !quiz.questions.length) return null;
+    return { quizId: quiz.quizId, questions: quiz.questions };
+  } catch { return null; }
 }
 
 

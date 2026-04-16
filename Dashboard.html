@@ -72,26 +72,35 @@
   </footer>
 
   <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       initNav("dashboard");
 
-      
+      // Fetch courses from API, fallback to local
+      const apiCourses = await fetchCoursesFromApi();
+      const activeCourses = apiCourses || courses;
+
       const progress = Storage.getProgress();
       let completed = 0, inProg = 0;
-      courses.forEach(c => {
+      activeCourses.forEach(c => {
         const done = progress[c.id] || 0;
         if (done >= c.totalLessons) completed++;
         else if (done > 0) inProg++;
       });
-      document.getElementById("totalCourses").textContent = courses.length;
+
+      // Fetch quiz results from API
+      const userId = Storage.getUserId();
+      const apiResults = await Api.getResults(userId);
+      const quizCount = apiResults ? apiResults.length : Storage.getQuizResults().length;
+
+      document.getElementById("totalCourses").textContent = activeCourses.length;
       document.getElementById("completedCourses").textContent = completed;
       document.getElementById("inProgress").textContent = inProg;
-      document.getElementById("quizzesTaken").textContent = Storage.getQuizResults().length;
+      document.getElementById("quizzesTaken").textContent = quizCount;
 
-      
       const container = document.getElementById("courseCards");
-      courses.forEach(c => {
+      activeCourses.forEach(c => {
         const done = progress[c.id] || 0;
         const pct = Math.round((done / c.totalLessons) * 100);
         const card = document.createElement("div");
@@ -109,7 +118,7 @@
             </div>
             <div class="card-actions">
               <a href="Courses.html?id=${c.id}" class="btn btn-primary btn-sm">View Course</a>
-              <a href="Quiz.html" class="btn btn-outline btn-sm">Take Quiz</a>
+              <a href="Quiz.html?courseId=${c.id}" class="btn btn-outline btn-sm">Take Quiz</a>
             </div>
           </div>`;
         container.appendChild(card);

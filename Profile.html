@@ -70,12 +70,18 @@
   </footer>
 
   <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
       initNav("profile");
 
-      
-      const profile = Storage.getProfile();
+      // Fetch user profile from API
+      const userId = Storage.getUserId();
+      const apiUser = await Api.getUser(userId);
+      const profile = apiUser
+        ? { name: apiUser.fullName, email: apiUser.email, joined: new Date(apiUser.createdAt).toLocaleDateString(), role: "Learner" }
+        : Storage.getProfile();
+
       document.getElementById("profileCard").innerHTML = `
         <div class="profile-avatar">${profile.name.charAt(0)}</div>
         <div class="profile-info">
@@ -85,10 +91,13 @@
           <span class="badge badge-learner">${profile.role}</span>
         </div>`;
 
-      
+      // Fetch courses from API
+      const apiCourses = await fetchCoursesFromApi();
+      const activeCourses = apiCourses || courses;
+
       const list = document.getElementById("completedList");
       const progress = Storage.getProgress();
-      courses.forEach(c => {
+      activeCourses.forEach(c => {
         const done = progress[c.id] || 0;
         const pct = Math.round((done / c.totalLessons) * 100);
         const isComplete = done >= c.totalLessons;
@@ -103,26 +112,44 @@
         list.appendChild(li);
       });
 
-      
-      const results = Storage.getQuizResults();
+      // Fetch quiz results from API, fallback to localStorage
+      const apiResults = await Api.getResults(userId);
       const tbody = document.querySelector("#quizHistoryTable tbody");
-      if (results.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);">No quizzes taken yet.</td></tr>';
-      } else {
-        results.forEach((r, i) => {
+
+      if (apiResults && apiResults.length > 0) {
+        apiResults.forEach((r, i) => {
+          const pct = r.score > 0 ? calculatePercentage(r.score, 10) : 0;
+          const grade = getGrade(pct);
+          const passed = isPass(pct);
           const tr = document.createElement("tr");
           tr.innerHTML = `
             <td>${i + 1}</td>
-            <td>${new Date(r.date).toLocaleDateString()}</td>
-            <td>${r.score}/${r.total}</td>
-            <td>${r.percentage}%</td>
-            <td><strong>${r.grade}</strong></td>
-            <td><span class="badge ${r.passed ? 'bg-success' : 'bg-danger'}">${r.passed ? 'Pass' : 'Fail'}</span></td>`;
+            <td>${new Date(r.attemptDate).toLocaleDateString()}</td>
+            <td>${r.score}/${10}</td>
+            <td>${pct}%</td>
+            <td><strong>${grade}</strong></td>
+            <td><span class="badge ${passed ? 'bg-success' : 'bg-danger'}">${passed ? 'Pass' : 'Fail'}</span></td>`;
           tbody.appendChild(tr);
         });
+      } else {
+        const results = Storage.getQuizResults();
+        if (results.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--gray);">No quizzes taken yet.</td></tr>';
+        } else {
+          results.forEach((r, i) => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${i + 1}</td>
+              <td>${new Date(r.date).toLocaleDateString()}</td>
+              <td>${r.score}/${r.total}</td>
+              <td>${r.percentage}%</td>
+              <td><strong>${r.grade}</strong></td>
+              <td><span class="badge ${r.passed ? 'bg-success' : 'bg-danger'}">${r.passed ? 'Pass' : 'Fail'}</span></td>`;
+            tbody.appendChild(tr);
+          });
+        }
       }
 
-      
       document.getElementById("clearDataBtn").addEventListener("click", () => {
         if (confirm("Clear all progress and quiz data?")) {
           localStorage.clear();

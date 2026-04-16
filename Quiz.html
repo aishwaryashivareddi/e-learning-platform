@@ -60,15 +60,36 @@
   </footer>
 
   <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
   <script>
     let loadedQuestions = [];
+    let activeQuizId = null;
+    let questionMap = {}; // maps display index to questionId for API submission
 
     document.addEventListener("DOMContentLoaded", async () => {
       initNav("quiz");
 
-      
+      const params = new URLSearchParams(window.location.search);
+      const courseId = parseInt(params.get("courseId")) || 1;
+
       try {
-        loadedQuestions = await fetchQuiz();
+        // Try API first
+        const apiQuiz = await fetchQuizFromApi(courseId);
+        if (apiQuiz) {
+          activeQuizId = apiQuiz.quizId;
+          loadedQuestions = apiQuiz.questions.map((q, i) => {
+            questionMap[i] = q.questionId;
+            return {
+              id: q.questionId,
+              question: q.questionText,
+              options: [q.optionA, q.optionB, q.optionC, q.optionD],
+              correct: -1 // don't expose correct answer on client
+            };
+          });
+        } else {
+          loadedQuestions = await fetchQuiz();
+        }
+
         document.getElementById("quizLoader").style.display = "none";
         document.getElementById("quizForm").style.display = "block";
         renderQuestions(loadedQuestions);
@@ -114,18 +135,26 @@
     }
 
    
-    document.getElementById("quizForm").addEventListener("submit", (e) => {
+    document.getElementById("quizForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
       let score = 0;
       let unanswered = 0;
+      const apiAnswers = [];
 
-      loadedQuestions.forEach(q => {
+      loadedQuestions.forEach((q, idx) => {
         const selected = document.querySelector(`input[name="q${q.id}"]:checked`);
         if (!selected) {
           unanswered++;
-        } else if (parseInt(selected.value) === q.correct) {
-          score++;
+        } else {
+          const optIdx = parseInt(selected.value);
+          // For API submission: map option index to A/B/C/D
+          const answerLetter = ["A","B","C","D"][optIdx];
+          if (questionMap[idx]) {
+            apiAnswers.push({ questionId: questionMap[idx], selectedAnswer: answerLetter });
+          }
+          // For local fallback scoring
+          if (q.correct >= 0 && optIdx === q.correct) score++;
         }
       });
 
@@ -135,22 +164,31 @@
       }
 
       const total = loadedQuestions.length;
-      const percentage = calculatePercentage(score, total);
-      const grade = getGrade(percentage);
-      const passed = isPass(percentage);
-      const feedback = getFeedback(grade);
+      let percentage, grade, passed, feedback;
 
-      
-      Storage.saveQuizResult({
-        date: new Date().toISOString(),
-        score,
-        total,
-        percentage,
-        grade,
-        passed
-      });
+      // Submit to API if we have a quiz ID
+      if (activeQuizId) {
+        const userId = Storage.getUserId();
+        const result = await Api.submitQuiz(activeQuizId, userId, apiAnswers);
+        if (result) {
+          score = result.score;
+          percentage = calculatePercentage(score, total);
+          grade = getGrade(percentage);
+          passed = isPass(percentage);
+          feedback = getFeedback(grade);
+        }
+      }
 
-      
+      if (!percentage) {
+        percentage = calculatePercentage(score, total);
+        grade = getGrade(percentage);
+        passed = isPass(percentage);
+        feedback = getFeedback(grade);
+      }
+
+      // Save to localStorage as backup
+      Storage.saveQuizResult({ date: new Date().toISOString(), score, total, percentage, grade, passed });
+
       document.getElementById("quizForm").style.display = "none";
       showResults(score, total, percentage, grade, passed, feedback);
     });
